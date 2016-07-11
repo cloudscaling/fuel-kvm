@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 source functions.sh
 
@@ -24,7 +24,9 @@ fi
 
 echo "Creating storage..."
 
-virsh vol-create-as --name $name.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
+virsh vol-create-as --name ${name}.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
+virsh vol-create-as --name ${name}2.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
+virsh vol-create-as --name ${name}3.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
 pool_path=$(get_pool_path default)
 
 echo "Starting Fuel slave vm..."
@@ -37,12 +39,14 @@ virt-install \
   --virt-type=kvm \
   --pxe \
   --boot network,hd \
-  --disk "$pool_path/$name.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
+  --disk "$pool_path/${name}.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
+  --disk "$pool_path/${name}2.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
+  --disk "$pool_path/${name}3.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
   --noautoconsole \
   --network network=fuel-pxe,model=$net_driver \
   --network network=$external_network,model=$net_driver \
-  --graphics vnc,listen=0.0.0.0
-#  --cpu host \
+  --graphics vnc,listen=0.0.0.0 \
+#  --cpu host
 #If cpu parameter is set to "host" with QEMU 2.0 hypervisor
 #it causes critical failure during CentOS installation
 

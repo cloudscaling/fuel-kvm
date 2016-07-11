@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 source functions.sh
 
@@ -15,14 +15,14 @@ fi
 master_name=fuel-master #currently hardcoded in cleanup script
 master_ram=3072
 master_cpu=2
-master_disk=50G
+master_disk=100G
 iso_path=$1
 
 #Cluster nodes
 node_name=fuel-slave #currently hardcoded in cleanup script
-node_ram=3072
-node_cpu=1
-node_size=75G
+node_ram=4096
+node_cpu=2
+node_size=100G
 node_count=$2
 
 #Check and install required packages
@@ -47,3 +47,4 @@ else
 fi
 
 echo "Deployment was finished"
+

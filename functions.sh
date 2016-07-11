@@ -40,7 +40,8 @@ function setup_network {
     gateway_ip=$2
     modprobe nbd max_part=63
     qemu-nbd -n -c /dev/nbd0 $IMAGE_PATH/$name.qcow2
-    sleep 2
+    sleep 5
+    pvscan --cache
     vgscan --mknode
     vgchange -ay os
     sleep 2
