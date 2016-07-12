@@ -26,7 +26,7 @@ ifcfg_eth1_file=${FUEL_IFCFG_FILE:-'ifcfg-eth1'}
 
 fuel_pxe=fuel-pxe${FUEL_NETWORK_ENV_SUFFIX}
 fuel_public=fuel-public${FUEL_NETWORK_ENV_SUFFIX}
-fuel_adm_public=fuel-adm-public${FUEL_NETWORK_ENV_SUFFIX}
+fuel_adm_public=fuel-adm-pub${FUEL_NETWORK_ENV_SUFFIX}
 fuel_external=fuel-external${FUEL_NETWORK_ENV_SUFFIX}
 
 echo "Creating storage..."
