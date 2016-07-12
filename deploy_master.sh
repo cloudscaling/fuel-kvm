@@ -21,7 +21,13 @@ hosts_bridge=false
 #It will be used as default on Fuel Master node
 #By default gateway for fuel-adm-public virtual network will be used
 #gateway_ip=172.18.78.1
-gateway_ip=172.16.1.1
+gateway_ip=${FUEL_NETWORK_GATEWAY:-'172.16.1.1'}
+ifcfg_eth1_file=${FUEL_IFCFG_FILE:-'ifcfg-eth1'}
+
+fuel_pxe=fuel-pxe${FUEL_NETWORK_ENV_SUFFIX}
+fuel_public=fuel-public${FUEL_NETWORK_ENV_SUFFIX}
+fuel_adm_public=fuel-adm-public${FUEL_NETWORK_ENV_SUFFIX}
+fuel_external=fuel-external${FUEL_NETWORK_ENV_SUFFIX}
 
 echo "Creating storage..."
 
@@ -43,21 +49,21 @@ fi
 echo "Creating networks..."
 
 #10.20.0.0/24 - pxe (isolated)
-create_network fuel-pxe
+create_network $fuel_pxe
 
 #172.16.0.0/24 - public/floating (NAT)
-create_network fuel-public
+create_network $fuel_public
 
 #172.16.1.0/24 - public/master-node (NAT)
-create_network fuel-adm-public
+create_network $fuel_adm_public
 
 if $hosts_bridge
 then
     #directly connected to a host's bridge (br0)
-    create_network fuel-external
-    external_network=fuel-external
+    create_network $fuel_external
+    external_network=$fuel_external
 else
-    external_network=fuel-adm-public
+    external_network=$fuel_adm_public
 fi
 
 echo "Starting Fuel master vm..."
@@ -72,7 +78,7 @@ virt-install \
   --disk "$pool_path/$name.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
   --cdrom "$pool_path/$iso_name" \
   --noautoconsole \
-  --network network=fuel-pxe,model=$net_driver \
+  --network network=$fuel_pxe,model=$net_driver \
   --network network=$external_network,model=$net_driver \
   --graphics vnc,listen=0.0.0.0
 #  --cpu host \
@@ -93,7 +99,7 @@ do
        #'setup_cache' is a dirty workaround for unsupported 'unsafe' cache mode
        #in older versions of virt-install utility
        setup_cache $name
-       setup_network $name $gateway_ip
+       setup_network $name $gateway_ip $ifcfg_eth1_file
        virsh start $name
        break
     fi
@@ -101,7 +107,7 @@ do
 done
 
 echo "CentOS is installed successfully. Running Fuel master deployment..."
-vm_master_ip=10.20.0.2
+vm_master_ip=${FUEL_MASTER_ADDR:-'10.20.0.2'}
 vm_master_username=root
 vm_master_password=r00tme
 

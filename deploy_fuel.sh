@@ -12,14 +12,14 @@ fi
 #export net_driver=virtio
 
 #Fuel master node
-master_name=fuel-master #currently hardcoded in cleanup script
+master_name=${FUEL_MASTER_NAME:-'fuel-master'}
 master_ram=3072
 master_cpu=2
 master_disk=100G
 iso_path=$1
 
 #Cluster nodes
-node_name=fuel-slave #currently hardcoded in cleanup script
+node_name=${FUEL_SLAVE_NAME_PREFIX:-'fuel-slave'}
 node_ram=4096
 node_cpu=2
 node_size=100G
@@ -29,8 +29,8 @@ node_count=$2
 check_packages
 
 #Remove old VMs
-remove_master
-remove_slaves
+remove_master $master_name
+remove_slaves $node_name
 
 #Deploy Fuel master node
 ./deploy_master.sh $iso_path $master_name $master_ram $master_cpu $master_disk || exit 1

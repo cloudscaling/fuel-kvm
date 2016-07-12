@@ -38,6 +38,7 @@ function setup_network {
     IMAGE_PATH=$(get_pool_path default)
     name=$1
     gateway_ip=$2
+    ifcfg_eth1_file=$3
     modprobe nbd max_part=63
     qemu-nbd -n -c /dev/nbd0 $IMAGE_PATH/$name.qcow2
     sleep 5
@@ -50,7 +51,7 @@ function setup_network {
     for i in "NETWORKING=yes" "HOSTNAME=fuel.domain.tld" "GATEWAY=$gateway_ip" ; do
       echo ${i} >> ${TMPD}/etc/sysconfig/network
     done
-    cp ifcfg-eth1 $TMPD/etc/sysconfig/network-scripts/
+    cp $ifcfg_eth1_file $TMPD/etc/sysconfig/network-scripts/ifcfg-eth1
     #Fuel 6.1 and newer displays network setup menu by default
     if [ -f ${TMPD}/root/.showfuelmenu ]; then
       sed -i 's/showmenu=yes/showmenu=no/g' ${TMPD}/root/.showfuelmenu || true
@@ -110,31 +111,32 @@ function get_vnc() {
 }
 
 function remove_master () {
-     master=$(virsh list --all | grep fuel-master | awk '{print $2}')
+     name=$1
+     master=$(virsh list --all | grep $name | awk '{print $2}')
      if [ ! -z $master ]
      then
          echo "Deleting Fuel Master vm..."
-         NAME=fuel-master
-         for j in $(virsh snapshot-list $NAME | awk '{print $1}' | tail -n+3)
+         for j in $(virsh snapshot-list $name | awk '{print $1}' | tail -n+3)
          do
-            virsh snapshot-delete $NAME $j
+            virsh snapshot-delete $name $j
          done
-         virsh destroy $NAME
-         virsh undefine $NAME
-         virsh vol-delete --pool default fuel-master.qcow2
+         virsh destroy $name
+         virsh undefine $name
+         virsh vol-delete --pool default ${name}.qcow2
      fi
      pool_path=$(get_pool_path default)
      if [ -z "$pool_path" ]; then return; fi
-     master=$(virsh vol-list --pool default | grep fuel-master | awk '{print $2}')
+     master=$(virsh vol-list --pool default | grep $name | awk '{print $2}')
      if [ ! -z $master ]
      then
-          virsh vol-delete --pool default fuel-master.qcow2
+          virsh vol-delete --pool default ${name}.qcow2
      fi
 }
 
 function remove_slaves () {
+   name=$1
    echo "Deleting Fuel nodes..."
-   for i in $(virsh list --all | grep fuel-slave- | awk '{print $2}')
+   for i in $(virsh list --all | grep $name | awk '{print $2}')
    do
       for j in $(virsh snapshot-list $i | awk '{print $1}' | tail -n+3)
       do
@@ -146,7 +148,7 @@ function remove_slaves () {
 
    pool_path=$(get_pool_path default)
    if [ -z "$pool_path" ]; then return; fi
-   for i in $(virsh vol-list --pool default | grep fuel-slave- | awk '{print $1}')
+   for i in $(virsh vol-list --pool default | grep $name | awk '{print $1}')
    do
       virsh vol-delete --pool default $i
    done

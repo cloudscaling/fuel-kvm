@@ -14,8 +14,10 @@ case "$OPERATION" in
 
  "cleanup")
   echo "Cleaning up..."
-  remove_master
-  remove_slaves
+  master_name=${FUEL_MASTER_NAME:-'fuel-master'}
+  slave_name_prefix=${FUEL_SLAVE_NAME_PREFIX:-'fuel-slave'}
+  remove_master $master_name
+  remove_slaves $slave_name_prefix
  ;;
  "snapshot-nodes")
   echo "Snapshotting nodes..."
