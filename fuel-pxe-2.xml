@@ -1,5 +1,5 @@
 <network>
-  <name>fuel-pxe</name>
-  <bridge name="fuel-pxe" />
+  <name>fuel-pxe-2</name>
+  <bridge name="fuel-pxe-2" />
   <ip address="10.22.0.1" netmask="255.255.255.0"/>
 </network>
