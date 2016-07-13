@@ -22,7 +22,8 @@ hosts_bridge=false
 #By default gateway for fuel-adm-public virtual network will be used
 #gateway_ip=172.18.78.1
 gateway_ip=${FUEL_NETWORK_GATEWAY:-'172.16.1.1'}
-ifcfg_eth1_file=${FUEL_IFCFG_FILE:-'ifcfg-eth1'}
+ifcfg_eth0_file=${FUEL_IFCFG0_FILE:-'ifcfg-eth0'}
+ifcfg_eth1_file=${FUEL_IFCFG1_FILE:-'ifcfg-eth1'}
 
 fuel_pxe=fuel-pxe${FUEL_NETWORK_ENV_SUFFIX}
 fuel_public=fuel-public${FUEL_NETWORK_ENV_SUFFIX}
@@ -99,7 +100,7 @@ do
        #'setup_cache' is a dirty workaround for unsupported 'unsafe' cache mode
        #in older versions of virt-install utility
        setup_cache $name
-       setup_network $name $gateway_ip $ifcfg_eth1_file
+       setup_network $name $gateway_ip $ifcfg_eth0_file $ifcfg_eth1_file
        virsh start $name
        break
     fi

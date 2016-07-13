@@ -38,7 +38,8 @@ function setup_network {
     IMAGE_PATH=$(get_pool_path default)
     name=$1
     gateway_ip=$2
-    ifcfg_eth1_file=$3
+    ifcfg_eth0_file=$3
+    ifcfg_eth1_file=$4
     modprobe nbd max_part=63
     qemu-nbd -n -c /dev/nbd0 $IMAGE_PATH/$name.qcow2
     sleep 5
@@ -51,6 +52,7 @@ function setup_network {
     for i in "NETWORKING=yes" "HOSTNAME=fuel.domain.tld" "GATEWAY=$gateway_ip" ; do
       echo ${i} >> ${TMPD}/etc/sysconfig/network
     done
+    cp $ifcfg_eth0_file $TMPD/etc/sysconfig/network-scripts/ifcfg-eth0
     cp $ifcfg_eth1_file $TMPD/etc/sysconfig/network-scripts/ifcfg-eth1
     #Fuel 6.1 and newer displays network setup menu by default
     if [ -f ${TMPD}/root/.showfuelmenu ]; then
