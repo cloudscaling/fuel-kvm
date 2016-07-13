@@ -55,7 +55,7 @@ function setup_network {
     cp $ifcfg_eth0_file $TMPD/etc/sysconfig/network-scripts/ifcfg-eth0
     cp $ifcfg_eth1_file $TMPD/etc/sysconfig/network-scripts/ifcfg-eth1
     eth0_addr=`awk -F '=' '/IPADDR/ {print($2)}' $ifcfg_eth0_file`
-    sed -i "s/\(.*\)\(fuel.domain.tld\)\(.*\)/$addr   \2\3/g" $TMPD/etc/hosts
+    sed -i "s/\(.*\)\(fuel.domain.tld\)\(.*\)/$eth0_addr   \2\3/g" $TMPD/etc/hosts
     #Fuel 6.1 and newer displays network setup menu by default
     if [ -f ${TMPD}/root/.showfuelmenu ]; then
       sed -i 's/showmenu=yes/showmenu=no/g' ${TMPD}/root/.showfuelmenu || true
