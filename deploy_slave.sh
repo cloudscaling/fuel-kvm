@@ -15,11 +15,14 @@ size=$4
 net_driver=${net_driver:-e1000}
 hosts_bridge=false
 
+fuel_pxe=fuel-pxe${FUEL_NETWORK_ENV_SUFFIX}
+fuel_public=fuel-public${FUEL_NETWORK_ENV_SUFFIX}
+fuel_external=fuel-external${FUEL_NETWORK_ENV_SUFFIX}
 if $hosts_bridge
 then
-  external_network=fuel-external
+  external_network=$fuel_external
 else
-  external_network=fuel-public
+  external_network=$fuel_public
 fi
 
 echo "Creating storage..."
@@ -43,7 +46,7 @@ virt-install \
   --disk "$pool_path/${name}2.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
   --disk "$pool_path/${name}3.qcow2",cache=writeback,bus=virtio,serial=$(uuidgen) \
   --noautoconsole \
-  --network network=fuel-pxe,model=$net_driver \
+  --network network=$fuel_pxe,model=$net_driver \
   --network network=$external_network,model=$net_driver \
   --graphics vnc,listen=0.0.0.0 \
 #  --cpu host
