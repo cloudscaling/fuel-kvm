@@ -117,7 +117,7 @@ function get_vnc() {
 function remove_master () {
      name=$1
      master=$(virsh list --all | grep $name | awk '{print $2}')
-     if [ ! -z $master ]
+     if [ ! -z "$master" ]
      then
          echo "Deleting Fuel Master vm..."
          for j in $(virsh snapshot-list $name | awk '{print $1}' | tail -n+3)
@@ -131,7 +131,7 @@ function remove_master () {
      pool_path=$(get_pool_path default)
      if [ -z "$pool_path" ]; then return; fi
      master=$(virsh vol-list --pool default | grep $name | awk '{print $2}')
-     if [ ! -z $master ]
+     if [ ! -z "$master" ]
      then
           virsh vol-delete --pool default ${name}.qcow2
      fi
