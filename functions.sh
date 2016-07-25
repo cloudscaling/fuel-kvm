@@ -116,7 +116,7 @@ function get_vnc() {
 
 function remove_master () {
      name=$1
-     master=$(virsh list --all | grep $name | awk '{print $2}')
+     master=$(virsh list --all | grep "$name " | awk '{print $2}')
      if [[ ! -z "$master" ]]
      then
          echo "Deleting Fuel Master vm..."

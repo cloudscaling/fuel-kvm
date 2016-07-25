@@ -39,7 +39,7 @@ iso_name=$(basename $iso_path)
 if [ -f $pool_path/$iso_name ]; then
   sum1=$(md5sum $pool_path/$iso_name | awk '{print $1}')
   sum2=$(md5sum $iso_path | awk '{print $1}')
-  if [ "$sum1" != "$sum2" ]; then
+  if [[ "$sum1" != "$sum2" ]]; then
     rm -f $pool_path/$iso_name
     cp -f $iso_path $pool_path/
   fi
@@ -95,7 +95,7 @@ virsh dominfo $name &> /dev/null || (echo "Fuel master failed to start" && exit 
 while (true)
 do
    STATUS=$(virsh dominfo $name | grep State | awk '{print $2}')
-   if [ $STATUS == 'shut' ]
+   if [[ "$STATUS" == 'shut' ]]
    then
        #'setup_cache' is a dirty workaround for unsupported 'unsafe' cache mode
        #in older versions of virt-install utility
