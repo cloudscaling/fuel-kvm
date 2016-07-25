@@ -57,7 +57,7 @@ function setup_network {
     eth0_addr=`awk -F '=' '/IPADDR/ {print($2)}' $ifcfg_eth0_file`
     sed -i "s/\(.*\)\(fuel.domain.tld\)\(.*\)/$eth0_addr   \2\3/g" $TMPD/etc/hosts
     #Fuel 6.1 and newer displays network setup menu by default
-    if [ -f ${TMPD}/root/.showfuelmenu ]; then
+    if [[ -f ${TMPD}/root/.showfuelmenu ]]; then
       sed -i 's/showmenu=yes/showmenu=no/g' ${TMPD}/root/.showfuelmenu || true
     else
       sed -i 's/showmenu=yes/showmenu=no/g' ${TMPD}/etc/fuel/bootstrap_admin_node.conf || true
@@ -84,7 +84,7 @@ function is_product_vm_operational {
 
    time=0
    LOG_FINISHED=""
-   while [ -z "${LOG_FINISHED}" ]; do
+   while [[ -z "${LOG_FINISHED}" ]]; do
        sleep 60
        time=$(($time+60))
        LOG_FINISHED=$(${SSH_CMD} "grep -o 'Fuel node deployment complete' /var/log/puppet/bootstrap_admin_node.log" 2>/dev/null)
@@ -117,7 +117,7 @@ function get_vnc() {
 function remove_master () {
      name=$1
      master=$(virsh list --all | grep $name | awk '{print $2}')
-     if [ ! -z "$master" ]
+     if [[ ! -z "$master" ]]
      then
          echo "Deleting Fuel Master vm..."
          for j in $(virsh snapshot-list $name | awk '{print $1}' | tail -n+3)
@@ -129,9 +129,9 @@ function remove_master () {
          virsh vol-delete --pool default ${name}.qcow2
      fi
      pool_path=$(get_pool_path default)
-     if [ -z "$pool_path" ]; then return; fi
+     if [[ -z "$pool_path" ]]; then return; fi
      master=$(virsh vol-list --pool default | grep $name | awk '{print $2}')
-     if [ ! -z "$master" ]
+     if [[ ! -z "$master" ]]
      then
           virsh vol-delete --pool default ${name}.qcow2
      fi
@@ -151,7 +151,7 @@ function remove_slaves () {
    done
 
    pool_path=$(get_pool_path default)
-   if [ -z "$pool_path" ]; then return; fi
+   if [[ -z "$pool_path" ]]; then return; fi
    for i in $(virsh vol-list --pool default | grep $name | awk '{print $1}')
    do
       virsh vol-delete --pool default $i
