@@ -1,5 +1,8 @@
 #!/bin/bash
 
+env_number=${FUEL_ENV_NUMBER:-'0'}
+poolname="testpool"
+
 function check_packages {
     PACKAGES="sshpass qemu-utils lvm2 libvirt-bin virtinst qemu-kvm e2fsprogs"
     apt-get update
@@ -17,11 +20,11 @@ function get_pool_path {
 }
 
 function create_pool {
-    local path="/var/lib/libvirt/images"
-    virsh pool-define-as default dir - - - - "$path"
-    virsh pool-build default
-    virsh pool-start default
-    virsh pool-autostart default
+    local path="/var/lib/libvirt/images/$poolname"
+    virsh pool-define-as $poolname dir - - - - "$path"
+    virsh pool-build $poolname
+    virsh pool-start $poolname
+    virsh pool-autostart $poolname
 }
 
 function create_network {
@@ -35,7 +38,7 @@ function create_network {
 
 function setup_network {
     TMPD=$(mktemp -d)
-    IMAGE_PATH=$(get_pool_path default)
+    IMAGE_PATH=$(get_pool_path $poolname)
     name=$1
     gateway_ip=$2
     ifcfg_eth0_file=$3
@@ -126,21 +129,21 @@ function remove_master () {
          done
          virsh destroy $name
          virsh undefine $name
-         virsh vol-delete --pool default ${name}.qcow2
+         virsh vol-delete --pool $poolname ${name}.qcow2
      fi
-     pool_path=$(get_pool_path default)
+     pool_path=$(get_pool_path $poolname)
      if [[ -z "$pool_path" ]]; then return; fi
-     master=$(virsh vol-list --pool default | grep $name | awk '{print $2}')
+     master=$(virsh vol-list --pool $poolname | grep $name | awk '{print $2}')
      if [[ ! -z "$master" ]]
      then
-          virsh vol-delete --pool default ${name}.qcow2
+          virsh vol-delete --pool $poolname ${name}.qcow2
      fi
 }
 
 function remove_slaves () {
    name=$1
    echo "Deleting Fuel nodes..."
-   for i in $(virsh list --all | grep $name | awk '{print $2}')
+   for i in $(virsh list --all | grep ${name}-${env_number} | awk '{print $2}')
    do
       for j in $(virsh snapshot-list $i | awk '{print $1}' | tail -n+3)
       do
@@ -150,10 +153,58 @@ function remove_slaves () {
       virsh undefine $i
    done
 
-   pool_path=$(get_pool_path default)
+   pool_path=$(get_pool_path $poolname)
    if [[ -z "$pool_path" ]]; then return; fi
-   for i in $(virsh vol-list --pool default | grep $name | awk '{print $1}')
+   for i in $(virsh vol-list --pool $poolname | grep ${name}-${env_number} | awk '{print $1}')
    do
-      virsh vol-delete --pool default $i
+      virsh vol-delete --pool $poolname $i
    done
 }
+
+function make_network_xml() {
+  local net_name=$1
+  case "$network" in
+    fuel-adm-pub-*)
+      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><forward mode=\"nat\"/><ip address=\"172.18.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >./$net_name.xml
+      ;;
+    fuel-public-*)
+      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><forward mode=\"nat\"/><ip address=\"172.19.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >./$net_name.xml
+      ;;
+    fuel-pxe-*)
+      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><ip address=\"10.21.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >./$net_name.xml
+      ;;
+    *)
+      return 1
+  esac
+}
+
+function make_ifcfg_file() {
+  local iface="$1"
+  local iface_name=ifcfg-$iface-$env_number
+  case "$iface" in
+    eth0)
+      echo "DEVICE=$iface
+TYPE=Ethernet
+ONBOOT=yes
+NM_CONTROLLED=no
+BOOTPROTO=static
+NETWORK=10.21.$env_number.0
+NETMASK=255.255.255.0
+IPADDR=10.21.$env_number.2" >./$iface_name
+      ;;
+    eth1)
+      echo "DEVICE=$iface
+TYPE=Ethernet
+ONBOOT=yes
+NM_CONTROLLED=no
+BOOTPROTO=static
+NETWORK=172.19.$env_number.0
+NETMASK=255.255.255.0
+IPADDR=172.19.$env_number.2
+DNS1=8.8.8.8" >./$iface_name
+      ;;
+    *)
+      return 1
+  esac
+}
+

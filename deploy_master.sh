@@ -22,19 +22,21 @@ hosts_bridge=false
 #By default gateway for fuel-adm-public virtual network will be used
 #gateway_ip=172.18.78.1
 gateway_ip=${FUEL_NETWORK_GATEWAY:-'172.16.1.1'}
-ifcfg_eth0_file=${FUEL_IFCFG0_FILE:-'ifcfg-eth0'}
-ifcfg_eth1_file=${FUEL_IFCFG1_FILE:-'ifcfg-eth1'}
+make_ifcfg_file eth0
+make_ifcfg_file eth1
+ifcfg_eth0_file="ifcfg-eth0-$env_number"
+ifcfg_eth1_file="ifcfg-eth1-$env_number"
 
-fuel_pxe=fuel-pxe${FUEL_NETWORK_ENV_SUFFIX}
-fuel_public=fuel-public${FUEL_NETWORK_ENV_SUFFIX}
-fuel_adm_public=fuel-adm-pub${FUEL_NETWORK_ENV_SUFFIX}
-fuel_external=fuel-external${FUEL_NETWORK_ENV_SUFFIX}
+fuel_pxe="fuel-pxe-${env_number}"
+fuel_public="fuel-public-${env_number}"
+fuel_adm_public="fuel-adm-pub-${env_number}"
+fuel_external="fuel-external-${env_number}"
 
 echo "Creating storage..."
 
-virsh pool-info default &> /dev/null || create_pool
-virsh vol-create-as --name $name.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
-pool_path=$(get_pool_path default)
+virsh pool-info $poolname &> /dev/null || create_pool $poolname
+virsh vol-create-as --name $name.qcow2 --capacity $size --format qcow2 --allocation $size --pool $poolname
+pool_path=$(get_pool_path $poolname)
 iso_name=$(basename $iso_path)
 if [ -f $pool_path/$iso_name ]; then
   sum1=$(md5sum $pool_path/$iso_name | awk '{print $1}')
@@ -50,12 +52,15 @@ fi
 echo "Creating networks..."
 
 #10.20.0.0/24 - pxe (isolated)
+make_network_xml $fuel_pxe
 create_network $fuel_pxe
 
 #172.16.0.0/24 - public/floating (NAT)
+make_network_xml $fuel_public
 create_network $fuel_public
 
 #172.16.1.0/24 - public/master-node (NAT)
+make_network_xml $fuel_adm_public
 create_network $fuel_adm_public
 
 if $hosts_bridge
@@ -108,7 +113,7 @@ do
 done
 
 echo "CentOS is installed successfully. Running Fuel master deployment..."
-vm_master_ip=${FUEL_MASTER_ADDR:-'10.20.0.2'}
+vm_master_ip=${FUEL_MASTER_ADDR:-'10.21.$env_number.2'}
 vm_master_username=root
 vm_master_password=r00tme
 

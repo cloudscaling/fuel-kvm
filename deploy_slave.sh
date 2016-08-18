@@ -15,9 +15,9 @@ size=$4
 net_driver=${net_driver:-e1000}
 hosts_bridge=false
 
-fuel_pxe=fuel-pxe${FUEL_NETWORK_ENV_SUFFIX}
-fuel_public=fuel-public${FUEL_NETWORK_ENV_SUFFIX}
-fuel_external=fuel-external${FUEL_NETWORK_ENV_SUFFIX}
+fuel_pxe="fuel-pxe-$env_number"
+fuel_public="fuel-public-$env_number"
+fuel_external="fuel-external-$env_number"
 if $hosts_bridge
 then
   external_network=$fuel_external
@@ -27,10 +27,10 @@ fi
 
 echo "Creating storage..."
 
-virsh vol-create-as --name ${name}.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
-virsh vol-create-as --name ${name}2.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
-virsh vol-create-as --name ${name}3.qcow2 --capacity $size --format qcow2 --allocation $size --pool default
-pool_path=$(get_pool_path default)
+virsh vol-create-as --name ${name}.qcow2 --capacity $size --format qcow2 --allocation $size --pool $poolname
+virsh vol-create-as --name ${name}2.qcow2 --capacity $size --format qcow2 --allocation $size --pool $poolname
+virsh vol-create-as --name ${name}3.qcow2 --capacity $size --format qcow2 --allocation $size --pool $poolname
+pool_path=$(get_pool_path $poolname)
 
 echo "Starting Fuel slave vm..."
 

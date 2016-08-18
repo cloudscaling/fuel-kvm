@@ -1,6 +1,0 @@
-<network>
-  <name>fuel-adm-pub-2</name>
-  <bridge name="fuel-adm-pub-2" />
-  <forward mode="nat"/>
-  <ip address="172.17.1.1" netmask="255.255.255.0"/>
-</network>
