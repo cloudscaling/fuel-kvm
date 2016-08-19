@@ -93,6 +93,11 @@ function is_product_vm_operational {
            exit 1
        fi
    done
+ 
+   while ! ${SSH_CMD} "fuel node" ; do
+      echo wait fuel services;
+      sleep 5;
+   done
 }
 
 function wait_for_product_vm_to_install {

@@ -13,7 +13,7 @@ fi
 
 #Fuel master node
 master_name=${FUEL_MASTER_NAME:-'fuel-master'}
-master_ram=4096
+master_ram=6000
 master_cpu=4
 master_disk=100G
 iso_path=$1
