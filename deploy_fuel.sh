@@ -14,13 +14,13 @@ fi
 #Fuel master node
 master_name=${FUEL_MASTER_NAME:-'fuel-master'}
 master_ram=6000
-master_cpu=4
+master_cpu=2
 master_disk=100G
 iso_path=$1
 
 #Cluster nodes
 node_name=${FUEL_SLAVE_NAME_PREFIX:-'fuel-slave'}
-node_ram=8192
+node_ram=10000
 node_cpu=4
 node_size=100G
 node_count=$2
