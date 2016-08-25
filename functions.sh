@@ -31,7 +31,7 @@ function create_network {
     local NET=$1
     virsh net-destroy ${NET} 2> /dev/null || true
     virsh net-undefine ${NET} 2> /dev/null || true
-    virsh net-define ${NET}.xml
+    virsh net-define /tmp/${NET}.xml
     virsh net-autostart ${NET}
     virsh net-start ${NET}
 }
@@ -143,7 +143,7 @@ function remove_master () {
 function remove_slaves () {
    name=$1
    echo "Deleting Fuel nodes..."
-   for i in $(virsh list --all | grep ${name}-${env_number} | awk '{print $2}')
+   for i in $(virsh list --all | grep $name | awk '{print $2}')
    do
       for j in $(virsh snapshot-list $i | awk '{print $1}' | tail -n+3)
       do
@@ -155,7 +155,7 @@ function remove_slaves () {
 
    pool_path=$(get_pool_path $poolname)
    if [[ -z "$pool_path" ]]; then return; fi
-   for i in $(virsh vol-list --pool $poolname | grep ${name}-${env_number} | awk '{print $1}')
+   for i in $(virsh vol-list --pool $poolname | grep $name | awk '{print $1}')
    do
       virsh vol-delete --pool $poolname $i
    done
@@ -163,15 +163,15 @@ function remove_slaves () {
 
 function make_network_xml() {
   local net_name=$1
-  case "$network" in
+  case "$net_name" in
     fuel-adm-pub-*)
-      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><forward mode=\"nat\"/><ip address=\"172.18.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >./$net_name.xml
+      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><forward mode=\"nat\"/><ip address=\"172.19.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >/tmp/$net_name.xml
       ;;
     fuel-public-*)
-      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><forward mode=\"nat\"/><ip address=\"172.19.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >./$net_name.xml
+      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><forward mode=\"nat\"/><ip address=\"172.18.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >/tmp/$net_name.xml
       ;;
     fuel-pxe-*)
-      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><ip address=\"10.21.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >./$net_name.xml
+      echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><ip address=\"10.21.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >/tmp/$net_name.xml
       ;;
     *)
       return 1
@@ -190,7 +190,7 @@ NM_CONTROLLED=no
 BOOTPROTO=static
 NETWORK=10.21.$env_number.0
 NETMASK=255.255.255.0
-IPADDR=10.21.$env_number.2" >./$iface_name
+IPADDR=10.21.$env_number.2" >/tmp/$iface_name
       ;;
     eth1)
       echo "DEVICE=$iface
@@ -201,7 +201,7 @@ BOOTPROTO=static
 NETWORK=172.19.$env_number.0
 NETMASK=255.255.255.0
 IPADDR=172.19.$env_number.2
-DNS1=8.8.8.8" >./$iface_name
+DNS1=8.8.8.8" >/tmp/$iface_name
       ;;
     *)
       return 1
