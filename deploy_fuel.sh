@@ -28,10 +28,6 @@ node_count=$2
 #Check and install required packages
 check_packages
 
-#Remove old VMs
-remove_master $master_name
-remove_slaves $node_name
-
 #Deploy Fuel master node
 ./deploy_master.sh $iso_path $master_name $master_ram $master_cpu $master_disk || exit 1
 
