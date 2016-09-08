@@ -17,7 +17,7 @@ hosts_bridge=false
 
 fuel_pxe="fuel-pxe-$env_number"
 fuel_public="fuel-public-$env_number"
-fuel_external="fuel-external-$env_number"
+fuel_external="fuel-external"
 if $hosts_bridge
 then
   external_network=$fuel_external

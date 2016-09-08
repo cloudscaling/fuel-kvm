@@ -1,7 +1,7 @@
 #!/bin/bash
 
 env_number=${FUEL_ENV_NUMBER:-'0'}
-poolname="testpool"
+poolname=${FUEL_VOLUME_POOL:-'fuel-images'}
 
 function check_packages {
     PACKAGES="sshpass qemu-utils lvm2 libvirt-bin virtinst qemu-kvm e2fsprogs"
@@ -29,6 +29,7 @@ function create_pool {
 
 function create_network {
     local NET=$1
+    make_network_xml $NET
     virsh net-destroy ${NET} 2> /dev/null || true
     virsh net-undefine ${NET} 2> /dev/null || true
     virsh net-define /tmp/${NET}.xml
@@ -109,6 +110,11 @@ function wait_for_product_vm_to_install {
     while ! is_product_vm_operational ${ip} ${username} ${password} ; do
         sleep 5
     done
+
+    while ! ${SSH_CMD} "fuel node" ; do
+       echo wait fuel services;
+       sleep 5;
+    done
 }
 
 function get_vnc() {
@@ -173,6 +179,8 @@ function make_network_xml() {
     fuel-pxe-*)
       echo "<network><name>$net_name</name><bridge name=\"$net_name\" /><ip address=\"10.21.$env_number.1\" netmask=\"255.255.255.0\"/></network>" >/tmp/$net_name.xml
       ;;
+    fuel-external*)
+      echo "<network><name>$net_name</name><forward mode="bridge"/><bridge name="br0" /></network>" >/tmp/$net_name.xml
     *)
       return 1
   esac

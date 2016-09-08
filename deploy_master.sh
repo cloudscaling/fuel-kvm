@@ -21,7 +21,7 @@ hosts_bridge=false
 #It will be used as default on Fuel Master node
 #By default gateway for fuel-adm-public virtual network will be used
 #gateway_ip=172.18.78.1
-gateway_ip=${FUEL_NETWORK_GATEWAY:-"172.19.$env_number.1"}
+gateway_ip="172.19.$env_number.1"
 make_ifcfg_file eth0
 make_ifcfg_file eth1
 ifcfg_eth0_file="/tmp/ifcfg-eth0-$env_number"
@@ -30,7 +30,7 @@ ifcfg_eth1_file="/tmp/ifcfg-eth1-$env_number"
 fuel_pxe="fuel-pxe-${env_number}"
 fuel_public="fuel-public-${env_number}"
 fuel_adm_public="fuel-adm-pub-${env_number}"
-fuel_external="fuel-external-${env_number}"
+fuel_external="fuel-external"
 
 echo "Creating storage..."
 
@@ -51,16 +51,13 @@ fi
 
 echo "Creating networks..."
 
-#10.20.0.0/24 - pxe (isolated)
-make_network_xml $fuel_pxe
+#pxe (isolated)
 create_network $fuel_pxe
 
-#172.16.0.0/24 - public/floating (NAT)
-make_network_xml $fuel_public
+#public/floating (NAT)
 create_network $fuel_public
 
-#172.16.1.0/24 - public/master-node (NAT)
-make_network_xml $fuel_adm_public
+#public/master-node (NAT)
 create_network $fuel_adm_public
 
 if $hosts_bridge
@@ -113,7 +110,7 @@ do
 done
 
 echo "CentOS is installed successfully. Running Fuel master deployment..."
-vm_master_ip=${FUEL_MASTER_ADDR:-"10.21.$env_number.2"}
+vm_master_ip="10.21.$env_number.2"
 vm_master_username=root
 vm_master_password=r00tme
 
