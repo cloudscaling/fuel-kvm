@@ -14,8 +14,8 @@ case "$OPERATION" in
 
  "cleanup")
   echo "Cleaning up..."
-  master_name=${FUEL_MASTER_NAME:-'fuel-master'}
-  slave_name_prefix=${FUEL_SLAVE_NAME_PREFIX:-'fuel-slave'}
+  master_name="fuel-master-${env_number}"
+  slave_name_prefix="fuel-slave-${env_number}"
   remove_master $master_name
   remove_slaves $slave_name_prefix
  ;;

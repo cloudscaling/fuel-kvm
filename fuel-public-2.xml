@@ -1,6 +1,0 @@
-<network>
-  <name>fuel-public-2</name>
-  <bridge name="fuel-public-2" />
-  <forward mode="nat"/>
-  <ip address="172.17.0.1" netmask="255.255.255.0"/>
-</network>
