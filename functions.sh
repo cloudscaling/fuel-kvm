@@ -186,8 +186,10 @@ function make_network_xml() {
       ;;
     fuel-external*)
       echo "<network><name>$net_name</name><forward mode="bridge"/><bridge name="br0" /></network>" >/tmp/$net_name.xml
+      ;;
     *)
       return 1
+      ;;
   esac
 }
 
